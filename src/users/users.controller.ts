@@ -11,8 +11,8 @@ export class UsersController {
   }
 
   @Get()
-  public getUser(): string {
-      return 'Get User';
+  async getUser() {
+      return this.usersService.findAll();
   }
 }
 

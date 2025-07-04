@@ -15,6 +15,10 @@ export class UsersService {
     console.log('UserService initialized');
     return this.userRepository.save(user);
   }
+
+  async findAll(): Promise<User[]> {
+    return this.userRepository.find();
+  }
 }
 
 
