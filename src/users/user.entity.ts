@@ -10,5 +10,11 @@ export class User {
   email: string;
 
   @Column()
-  password: string;
+  passwordHash: string;
+
+  @Column()
+  firstName: string;
+
+  @Column()
+  lastName: string;
 }

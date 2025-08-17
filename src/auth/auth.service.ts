@@ -12,8 +12,8 @@ export class AuthService {
   ) {}
 
   // Check username + password, return User if OK
-  async validateUser(username: string, password: string) {
-    const user = await this.usersService.findByUsername(username);
+  async validateUser(email: string, password: string) {
+    const user = await this.usersService.findByUsername(email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const ok = await bcrypt.compare(password, user.passwordHash);
@@ -24,13 +24,17 @@ export class AuthService {
 
   // Generate a JWT
   async login(dto: LoginDto) {
-    const user = await this.validateUser(dto.username, dto.password);
+    const user = await this.validateUser(dto.email, dto.password);
 
-    const payload = { sub: user.id, username: user.username };
+    const payload = { sub: user.id, username: user.email };
 
     return {
       token: await this.jwt.signAsync(payload),
-      data: { name: user.username, email: user.email },
+      data: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      },
     };
   }
 }

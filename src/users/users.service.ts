@@ -9,22 +9,24 @@ const DEMO_HASH =
 
 @Injectable()
 export class UsersService {
-  private users = [
-    {
-      id: 1,
-      username: 'demo',
-      email: 'demo@example.com',
-      passwordHash: DEMO_HASH,
-    },
-  ];
-
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async createUser(email: string, password: string): Promise<User> {
-    const user = this.userRepository.create({ email, password });
+  async createUser(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+  ): Promise<User> {
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = this.userRepository.create({
+      email,
+      passwordHash,
+      firstName,
+      lastName,
+    });
     console.log('UserService initialized');
     return this.userRepository.save(user);
   }
@@ -33,8 +35,8 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  async findByUsername(username: string) {
-    return this.users.find((u) => u.username === username) ?? null;
+  async findByUsername(username: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { email: username } });
   }
 
   async validatePassword(hash: string, plain: string) {
