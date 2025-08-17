@@ -11,20 +11,27 @@ export class VideosService {
     2: path.join(process.cwd(), 'storage', 'videos', 'notre_perinee.mp4'),
   };
 
-  // Metadata returned to the app (thumbnail can be a placeholder for now)
+  // Metadata returned to the app
   list() {
     return [
       {
         id: 1,
         title: 'Le périnée mon ami',
-        thumbnailUrl: 'https://via.placeholder.com/400x200',
+        thumbnailUrl: 'http://localhost:3000/videos/thumbnail/1',
         videoUrl: 'http://localhost:3000/videos/stream/1',
         publishedAt: '2024-07-01T10:00:00.000Z',
       },
       {
         id: 2,
         title: 'Notre périnée',
-        thumbnailUrl: 'https://via.placeholder.com/400x200',
+        thumbnailUrl: 'http://localhost:3000/videos/thumbnail/2',
+        videoUrl: 'http://localhost:3000/videos/stream/2',
+        publishedAt: '2024-07-05T10:00:00.000Z',
+      },
+      {
+        id: 3,
+        title: 'Power core routine douce',
+        thumbnailUrl: 'http://localhost:3000/videos/thumbnail/3',
         videoUrl: 'http://localhost:3000/videos/stream/2',
         publishedAt: '2024-07-05T10:00:00.000Z',
       },

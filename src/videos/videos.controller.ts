@@ -15,6 +15,8 @@ import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { Response } from 'express';
 import { createReadStream, statSync } from 'fs';
+import { join } from 'path';
+import * as fs from 'fs';
 
 @Controller('videos')
 export class VideosController {
@@ -29,6 +31,14 @@ export class VideosController {
   // Return a simple list of video metadata for the app
   list() {
     return this.videosService.list();
+  }
+
+  @Get('thumbnail/:id')
+  async getThumb(@Param('id') id: string, @Res() res: Response) {
+    const file = join(process.cwd(), 'storage', 'thumbnails', `${id}.jpg`);
+    if (!fs.existsSync(file))
+      throw new NotFoundException('Thumbnail not found');
+    return res.sendFile(file);
   }
 
   @Get('stream/:id')
