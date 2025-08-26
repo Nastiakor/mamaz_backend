@@ -1,45 +1,51 @@
-import { Injectable } from '@nestjs/common';
+// Business logic: hashing, duplication checks, safe selects
+
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import * as bcrypt from 'bcryptjs';
-
-const DEMO_HASH =
-  '$2b$10$FbRjjVxmv8tuAQWnChOYsesIBxxrIqxnSQcD17TX/xJpEf6h8tmye';
+import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private repo: Repository<User>,
   ) {}
 
-  async createUser(
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string,
-  ): Promise<User> {
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = this.userRepository.create({
-      email,
+  async createUser(dto: CreateUserDto) {
+    // 1) Reject duplicate emails
+    const existing = await this.repo.findOne({ where: { email: dto.email } });
+    if (existing) throw new ConflictException('Email already in use');
+
+    // 2) Hash password before saving
+    const passwordHash = await bcrypt.hash(dto.password, 10);
+
+    // 3) Create and persist
+    const user = this.repo.create({
+      email: dto.email,
       passwordHash,
-      firstName,
-      lastName,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
     });
-    console.log('UserService initialized');
-    return this.userRepository.save(user);
+
+    return this.repo.save(user);
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userRepository.find();
+  async findAllSafe() {
+    // Return only non-sensitive columns
+    return this.repo.find({
+      select: ['id', 'email', 'firstName', 'lastName'],
+      order: { id: 'ASC' },
+    });
   }
 
-  async findByUsername(username: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { email: username } });
+  async findByUsername(email: string) {
+    return this.repo.findOne({ where: { email } });
   }
 
-  async validatePassword(hash: string, plain: string) {
-    return bcrypt.compare(plain, hash);
+  async findByEmail(email: string) {
+    return this.findByUsername(email);
   }
 }

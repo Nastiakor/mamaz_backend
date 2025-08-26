@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-console.log('User entity loaded');
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()

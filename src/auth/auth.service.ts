@@ -3,6 +3,12 @@ import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
+import { AuthResponseDto } from './dto/auth-response.dto';
+
+interface JwtPayload {
+  sub: number;
+  email: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -11,9 +17,9 @@ export class AuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  // Check username + password, return User if OK
+  // Validate credentials. Returns the user if valid, throws otherwise.
   async validateUser(email: string, password: string) {
-    const user = await this.usersService.findByUsername(email);
+    const user = await this.usersService.findByEmail(email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const ok = await bcrypt.compare(password, user.passwordHash);
@@ -23,16 +29,17 @@ export class AuthService {
   }
 
   // Generate a JWT
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.validateUser(dto.email, dto.password);
 
-    const payload = { sub: user.id, username: user.email };
+    const payload: JwtPayload = { sub: user.id, email: user.email };
+    const token = await this.jwt.signAsync(payload);
 
     return {
-      token: await this.jwt.signAsync(payload),
+      token,
       data: {
-        firstName: user.firstName,
-        lastName: user.lastName,
+        firstName: user.firstName ?? null,
+        lastName: user.lastName ?? null,
         email: user.email,
       },
     };

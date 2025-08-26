@@ -6,28 +6,30 @@ import {
   Req,
   UseGuards,
   BadRequestException,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { AuthResponseDto } from './dto/auth-response.dto';
+
+type JwtUser = { userId: number; email: string };
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto) {
-    try {
-      return await this.authService.login(loginDto);
-    } catch (e) {
-      throw new BadRequestException(e.message);
-    }
+  @HttpCode(HttpStatus.OK)
+  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
+    return this.authService.login(loginDto);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
-  me(@Req() req: any) {
-    // req.user vient de jwt.strategy.ts
+  me(@Req() req: { user: JwtUser }) {
+    // req.user is populated by JwtStrategy.validate
     return req.user;
   }
 }
