@@ -14,11 +14,6 @@ export class CreateArticleDto {
   imageUrl?: string;
 
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
-
-  @IsOptional()
   publishedAt?: Date;
 
   @IsOptional()

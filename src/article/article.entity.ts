@@ -11,7 +11,7 @@ export class Article {
   @Column({ type: 'jsonb', nullable: true })
   content: Array<{ type: string; contenu: string }>;
 
-  @Column({ nullable: true })
+  @Column({ unique: true, nullable: true })
   slug: string;
 
   @Column({ nullable: true })
